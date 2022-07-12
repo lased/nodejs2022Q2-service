@@ -4,9 +4,8 @@ import { v4 } from 'uuid';
 import {
   BadRequestException,
   ForbiddenException,
-  Inject,
-  Injectable,
   NotFoundException,
+  Injectable,
 } from '@nestjs/common';
 
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,7 +18,7 @@ import { InMemoryStore } from 'src/services';
 export class UsersService {
   constructor(
     private configService: ConfigService,
-    @Inject('InMemoryStore') private inMemoryStore: InMemoryStore<User>,
+    private inMemoryStore: InMemoryStore<User>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -62,9 +61,9 @@ export class UsersService {
       throw new ForbiddenException(MESSAGE.PASSWORD_MATCH);
     }
 
-    const updatedUser = this.findById(id);
+    const user = this.findById(id);
     const newHashedPassword = await this.hashPassword(newPassword);
-    const isCompare = await compare(oldPassword, updatedUser.password);
+    const isCompare = await compare(oldPassword, user.password);
 
     if (!isCompare) {
       throw new ForbiddenException(MESSAGE.PASSWORD_DONT_MATCH);
@@ -73,7 +72,7 @@ export class UsersService {
     const newUserData: Partial<User> = {
       password: newHashedPassword,
       updatedAt: Date.now(),
-      version: updatedUser.version + 1,
+      version: user.version + 1,
     };
 
     return this.inMemoryStore.update(id, newUserData);
