@@ -1,8 +1,10 @@
+import { ConfigService } from '@nestjs/config';
 import { hash, compare } from 'bcrypt';
 import { v4 } from 'uuid';
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,17 +12,18 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { ConfigService } from '@nestjs/config';
 import { MESSAGE } from './users.constants';
+import { InMemoryStore } from 'src/services';
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [];
-
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    @Inject('InMemoryStore') private inMemoryStore: InMemoryStore<User>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.users.find((usr) => usr.login === createUserDto.login);
+    const user = this.inMemoryStore.findOne({ login: createUserDto.login });
 
     if (user) {
       throw new BadRequestException(MESSAGE.EXISTS(createUserDto.login));
@@ -35,17 +38,17 @@ export class UsersService {
     newUser.updatedAt = Date.now();
     newUser.version = 1;
 
-    this.users.push(newUser);
+    this.inMemoryStore.create(newUser);
 
     return newUser;
   }
 
   findAll() {
-    return this.users;
+    return this.inMemoryStore.findAll();
   }
 
-  findOne(id: string) {
-    const user = this.users.find((usr) => usr.id === id);
+  findById(id: string) {
+    const user = this.inMemoryStore.findById(id);
 
     if (!user) {
       throw new NotFoundException(MESSAGE.NOT_FOUND);
@@ -59,7 +62,7 @@ export class UsersService {
       throw new ForbiddenException(MESSAGE.PASSWORD_MATCH);
     }
 
-    const updatedUser = this.findOne(id);
+    const updatedUser = this.findById(id);
     const newHashedPassword = await this.hashPassword(newPassword);
     const isCompare = await compare(oldPassword, updatedUser.password);
 
@@ -67,17 +70,21 @@ export class UsersService {
       throw new ForbiddenException(MESSAGE.PASSWORD_DONT_MATCH);
     }
 
-    updatedUser.password = newHashedPassword;
-    updatedUser.updatedAt = Date.now();
-    updatedUser.version++;
+    const newUserData: Partial<User> = {
+      password: newHashedPassword,
+      updatedAt: Date.now(),
+      version: updatedUser.version + 1,
+    };
 
-    return updatedUser;
+    return this.inMemoryStore.update(id, newUserData);
   }
 
   remove(id: string) {
-    const deletedUser = this.findOne(id);
+    const deletedUser = this.inMemoryStore.remove(id);
 
-    this.users = this.users.filter((usr) => usr.id !== id);
+    if (!deletedUser) {
+      throw new NotFoundException(MESSAGE.NOT_FOUND);
+    }
 
     return deletedUser;
   }
