@@ -10,7 +10,13 @@ export class InMemoryStore<T extends { id: string }> {
     return item;
   }
 
-  findAll() {
+  findAll(filter?: Partial<T>) {
+    if (filter) {
+      return this.list.filter((item) =>
+        Object.keys(filter).every((key) => item[key] === filter[key]),
+      );
+    }
+
     return this.list;
   }
 

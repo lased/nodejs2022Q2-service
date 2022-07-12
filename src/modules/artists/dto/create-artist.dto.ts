@@ -1,11 +1,12 @@
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
+import { OmitType } from '@nestjs/mapped-types';
+import { IsNotEmpty } from 'class-validator';
 
-export class CreateArtistDto {
-  @IsString()
+import { Artist } from '../entities/artist.entity';
+
+export class CreateArtistDto extends OmitType(Artist, ['id']) {
   @IsNotEmpty()
   name: string;
 
-  @IsBoolean()
   @IsNotEmpty()
   grammy: boolean;
 }

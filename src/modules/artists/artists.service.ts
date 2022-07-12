@@ -1,24 +1,27 @@
-import { ConfigService } from '@nestjs/config';
-import { hash, compare } from 'bcrypt';
-import { v4 } from 'uuid';
 import {
-  BadRequestException,
-  ForbiddenException,
   NotFoundException,
   Injectable,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
+import { v4 } from 'uuid';
 
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { AlbumsService } from '../albums/albums.service';
 import { Artist } from './entities/artist.entity';
 import { MESSAGE } from './artists.constants';
 import { InMemoryStore } from 'src/services';
 
 @Injectable()
 export class ArtistsService {
-  constructor(private inMemoryStore: InMemoryStore<Artist>) {}
+  constructor(
+    private inMemoryStore: InMemoryStore<Artist>,
+    @Inject(forwardRef(() => AlbumsService))
+    private albumsService: AlbumsService,
+  ) {}
 
-  async create({ name, grammy }: CreateArtistDto) {
+  create({ name, grammy }: CreateArtistDto) {
     const newArtist = new Artist();
 
     newArtist.id = v4();
@@ -44,7 +47,7 @@ export class ArtistsService {
     return artist;
   }
 
-  async update(id: string, updateArtistDto: UpdateArtistDto) {
+  update(id: string, updateArtistDto: UpdateArtistDto) {
     this.findById(id);
 
     return this.inMemoryStore.update(id, updateArtistDto);
@@ -56,6 +59,8 @@ export class ArtistsService {
     if (!deletedArtist) {
       throw new NotFoundException(MESSAGE.NOT_FOUND);
     }
+
+    this.albumsService.updateWhere({ artistId: id }, { artistId: null });
 
     return deletedArtist;
   }
