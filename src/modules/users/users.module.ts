@@ -8,5 +8,6 @@ import { InMemoryStore } from 'src/services';
 @Module({
   controllers: [UsersController],
   providers: [UsersService, ConfigService, InMemoryStore],
+  exports: [UsersService],
 })
 export class UsersModule {}

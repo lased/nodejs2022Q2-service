@@ -7,6 +7,7 @@ import {
 import { v4 } from 'uuid';
 
 import { ArtistsService } from '../artists/artists.service';
+import { TracksService } from '../tracks/tracks.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './entities/album.entity';
@@ -19,10 +20,14 @@ export class AlbumsService {
     private inMemoryStore: InMemoryStore<Album>,
     @Inject(forwardRef(() => ArtistsService))
     private artistsService: ArtistsService,
+    @Inject(forwardRef(() => TracksService))
+    private tracksService: TracksService,
   ) {}
 
-  async create({ name, artistId, year }: CreateAlbumDto) {
+  create({ name, artistId, year }: CreateAlbumDto) {
     const newAlbum = new Album();
+
+    artistId && this.artistsService.findById(artistId);
 
     newAlbum.id = v4();
     newAlbum.name = name;
@@ -75,6 +80,8 @@ export class AlbumsService {
     if (!deletedAlbum) {
       throw new NotFoundException(MESSAGE.NOT_FOUND);
     }
+
+    this.tracksService.updateWhere({ albumId: id }, { albumId: null });
 
     return deletedAlbum;
   }

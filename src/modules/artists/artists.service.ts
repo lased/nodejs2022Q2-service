@@ -9,6 +9,7 @@ import { v4 } from 'uuid';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { AlbumsService } from '../albums/albums.service';
+import { TracksService } from '../tracks/tracks.service';
 import { Artist } from './entities/artist.entity';
 import { MESSAGE } from './artists.constants';
 import { InMemoryStore } from 'src/services';
@@ -19,6 +20,8 @@ export class ArtistsService {
     private inMemoryStore: InMemoryStore<Artist>,
     @Inject(forwardRef(() => AlbumsService))
     private albumsService: AlbumsService,
+    @Inject(forwardRef(() => TracksService))
+    private tracksService: TracksService,
   ) {}
 
   create({ name, grammy }: CreateArtistDto) {
@@ -61,6 +64,7 @@ export class ArtistsService {
     }
 
     this.albumsService.updateWhere({ artistId: id }, { artistId: null });
+    this.tracksService.updateWhere({ artistId: id }, { artistId: null });
 
     return deletedArtist;
   }
