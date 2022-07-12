@@ -1,3 +1,4 @@
+import { compare } from 'bcrypt';
 import {
   Controller,
   Get,
@@ -8,11 +9,13 @@ import {
   HttpCode,
   ParseUUIDPipe,
   Put,
+  ForbiddenException,
 } from '@nestjs/common';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
+import { MESSAGE } from './users.constants';
 
 @Controller('user')
 export class UsersController {
@@ -35,11 +38,25 @@ export class UsersController {
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() { oldPassword, newPassword }: UpdateUserDto,
   ) {
-    return this.usersService.update(id, updateUserDto);
+    if (newPassword === oldPassword) {
+      throw new ForbiddenException(MESSAGE.PASSWORD_MATCH);
+    }
+
+    const user = this.usersService.findById(id);
+    const isCompare = await compare(oldPassword, user.password);
+
+    if (!isCompare) {
+      throw new ForbiddenException(MESSAGE.PASSWORD_DONT_MATCH);
+    }
+
+    return this.usersService.update(id, {
+      password: newPassword,
+      version: user.version + 1,
+    });
   }
 
   @Delete(':id')

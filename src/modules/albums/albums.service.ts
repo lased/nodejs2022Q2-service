@@ -6,22 +6,26 @@ import {
 } from '@nestjs/common';
 import { v4 } from 'uuid';
 
+import { FavoritesService } from '../favourites/favorites.service';
 import { ArtistsService } from '../artists/artists.service';
 import { TracksService } from '../tracks/tracks.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { IService } from 'src/shared/service.interface';
 import { Album } from './entities/album.entity';
 import { MESSAGE } from './albums.constants';
 import { InMemoryStore } from 'src/services';
 
 @Injectable()
-export class AlbumsService {
+export class AlbumsService implements IService<Album> {
   constructor(
     private inMemoryStore: InMemoryStore<Album>,
     @Inject(forwardRef(() => ArtistsService))
     private artistsService: ArtistsService,
     @Inject(forwardRef(() => TracksService))
     private tracksService: TracksService,
+    @Inject(forwardRef(() => FavoritesService))
+    private favoritesService: FavoritesService,
   ) {}
 
   create({ name, artistId, year }: CreateAlbumDto) {
@@ -82,6 +86,7 @@ export class AlbumsService {
     }
 
     this.tracksService.updateWhere({ albumId: id }, { albumId: null });
+    this.favoritesService.removeWhere('albums', id);
 
     return deletedAlbum;
   }

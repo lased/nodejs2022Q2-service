@@ -1,32 +1,27 @@
+import { NotFoundException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { hash, compare } from 'bcrypt';
+import { hash } from 'bcrypt';
 import { v4 } from 'uuid';
-import {
-  BadRequestException,
-  ForbiddenException,
-  NotFoundException,
-  Injectable,
-} from '@nestjs/common';
 
+import { IService } from 'src/shared/service.interface';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { MESSAGE } from './users.constants';
 import { InMemoryStore } from 'src/services';
+import { MESSAGE } from './users.constants';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements IService<User> {
   constructor(
     private configService: ConfigService,
     private inMemoryStore: InMemoryStore<User>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.inMemoryStore.findOne({ login: createUserDto.login });
+    // const user = this.inMemoryStore.findOne({ login: createUserDto.login });
 
-    if (user) {
-      throw new BadRequestException(MESSAGE.EXISTS(createUserDto.login));
-    }
+    // if (user) {
+    //   throw new BadRequestException(MESSAGE.EXISTS(createUserDto.login));
+    // }
 
     const newUser = new User();
 
@@ -56,23 +51,16 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, { oldPassword, newPassword }: UpdateUserDto) {
-    if (newPassword === oldPassword) {
-      throw new ForbiddenException(MESSAGE.PASSWORD_MATCH);
-    }
-
-    const user = this.findById(id);
-    const newHashedPassword = await this.hashPassword(newPassword);
-    const isCompare = await compare(oldPassword, user.password);
-
-    if (!isCompare) {
-      throw new ForbiddenException(MESSAGE.PASSWORD_DONT_MATCH);
-    }
+  async update(
+    id: string,
+    { password, version }: Pick<Required<User>, 'version' | 'password'>,
+  ) {
+    const newHashedPassword = await this.hashPassword(password);
 
     const newUserData: Partial<User> = {
       password: newHashedPassword,
       updatedAt: Math.floor(Date.now() / 1000),
-      version: user.version + 1,
+      version,
     };
 
     return this.inMemoryStore.update(id, newUserData);

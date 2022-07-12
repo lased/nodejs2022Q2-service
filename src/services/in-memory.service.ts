@@ -34,7 +34,7 @@ export class InMemoryStore<T extends { id: string }> {
     return entry || null;
   }
 
-  async update(id: string, receivedItem: Partial<T>) {
+  update(id: string, receivedItem: Partial<T>) {
     const item = this.findById(id);
 
     if (!item) {
