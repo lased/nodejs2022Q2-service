@@ -28,8 +28,8 @@ export class UsersService implements IService<User> {
     newUser.id = v4();
     newUser.login = createUserDto.login;
     newUser.password = await this.hashPassword(createUserDto.password);
-    newUser.createdAt = Math.floor(Date.now() / 1000);
-    newUser.updatedAt = Math.floor(Date.now() / 1000);
+    newUser.createdAt = Date.now();
+    newUser.updatedAt = Date.now();
     newUser.version = 1;
 
     this.inMemoryStore.create(newUser);
@@ -59,7 +59,7 @@ export class UsersService implements IService<User> {
 
     const newUserData: Partial<User> = {
       password: newHashedPassword,
-      updatedAt: Math.floor(Date.now() / 1000),
+      updatedAt: Date.now(),
       version,
     };
 
