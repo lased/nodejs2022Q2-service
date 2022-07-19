@@ -12,11 +12,18 @@ import { readFile } from 'fs/promises';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
-  const rootDirname = dirname(__dirname);
-  const DOC_API = await readFile(join(rootDirname, 'doc', 'api.yaml'), 'utf-8');
-  const document = parse(DOC_API);
 
-  SwaggerModule.setup('doc', app, document);
+  if (!process.env.NODE_ENV) {
+    const rootDirname = dirname(__dirname);
+    const DOC_API = await readFile(
+      join(rootDirname, 'doc', 'api.yaml'),
+      'utf-8',
+    );
+    const document = parse(DOC_API);
+
+    SwaggerModule.setup('doc', app, document);
+  }
+
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
