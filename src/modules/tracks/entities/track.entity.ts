@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 
 import { Artist } from 'src/modules/artists/entities/artist.entity';
 import { Album } from 'src/modules/albums/entities/album.entity';
@@ -13,6 +13,7 @@ export class Track {
   name: string;
 
   @Column('numeric')
+  @Type(() => Number)
   duration: number;
 
   @Column({ nullable: true })

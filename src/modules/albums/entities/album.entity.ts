@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import {
   Column,
   Entity,
@@ -19,6 +19,7 @@ export class Album {
   name: string;
 
   @Column('numeric')
+  @Type(() => Number)
   year: number;
 
   @Column({ nullable: true })
