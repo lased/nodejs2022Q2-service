@@ -1,54 +1,45 @@
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import {
   NotFoundException,
   Injectable,
   forwardRef,
   Inject,
 } from '@nestjs/common';
-import { v4 } from 'uuid';
 
-import { FavoritesService } from '../favourites/favorites.service';
 import { ArtistsService } from '../artists/artists.service';
-import { TracksService } from '../tracks/tracks.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { IService } from 'src/shared/service.interface';
 import { Album } from './entities/album.entity';
 import { MESSAGE } from './albums.constants';
-import { InMemoryStore } from 'src/services';
 
 @Injectable()
 export class AlbumsService implements IService<Album> {
   constructor(
-    private inMemoryStore: InMemoryStore<Album>,
+    @InjectRepository(Album) private albumRepo: Repository<Album>,
     @Inject(forwardRef(() => ArtistsService))
     private artistsService: ArtistsService,
-    @Inject(forwardRef(() => TracksService))
-    private tracksService: TracksService,
-    @Inject(forwardRef(() => FavoritesService))
-    private favoritesService: FavoritesService,
   ) {}
 
-  create({ name, artistId, year }: CreateAlbumDto) {
+  async create({ name, artistId, year }: CreateAlbumDto) {
     const newAlbum = new Album();
 
-    artistId && this.artistsService.findById(artistId);
-
-    newAlbum.id = v4();
     newAlbum.name = name;
     newAlbum.year = year;
     newAlbum.artistId = artistId;
 
-    this.inMemoryStore.create(newAlbum);
-
-    return newAlbum;
+    return this.albumRepo.save(newAlbum);
   }
 
   findAll() {
-    return this.inMemoryStore.findAll();
+    return this.albumRepo.find();
   }
 
-  findById(id: string) {
-    const album = this.inMemoryStore.findById(id);
+  async findById(id: string) {
+    const album = await this.albumRepo.findOne({
+      where: { id },
+    });
 
     if (!album) {
       throw new NotFoundException(MESSAGE.NOT_FOUND);
@@ -57,37 +48,22 @@ export class AlbumsService implements IService<Album> {
     return album;
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    this.findById(id);
+  async update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    const album = await this.findById(id);
+    const newAlbum = Object.assign(album, updateAlbumDto);
 
-    if (updateAlbumDto.artistId) {
-      this.artistsService.findById(updateAlbumDto.artistId);
-    }
+    await this.albumRepo.update(id, updateAlbumDto);
 
-    return this.inMemoryStore.update(id, updateAlbumDto);
+    return newAlbum;
   }
 
-  updateWhere(filter: Partial<Album>, updateAlbumDto: UpdateAlbumDto) {
-    const albums = this.inMemoryStore.findAll(filter);
-    const result = [];
+  async remove(id: string) {
+    const { affected } = await this.albumRepo.delete(id);
 
-    albums.forEach((album) => {
-      result.push(this.update(album.id, updateAlbumDto));
-    });
-
-    return result;
-  }
-
-  remove(id: string) {
-    const deletedAlbum = this.inMemoryStore.remove(id);
-
-    if (!deletedAlbum) {
+    if (!affected) {
       throw new NotFoundException(MESSAGE.NOT_FOUND);
     }
 
-    this.tracksService.updateWhere({ albumId: id }, { albumId: null });
-    this.favoritesService.removeWhere('albums', id);
-
-    return deletedAlbum;
+    return true;
   }
 }

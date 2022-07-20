@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { hash } from 'bcrypt';
-import { v4 } from 'uuid';
 
 import { IService } from 'src/shared/service.interface';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -58,9 +57,9 @@ export class UsersService implements IService<User> {
   }
 
   async remove(id: string) {
-    const deletedUser = await this.userRepo.delete(id);
+    const { affected } = await this.userRepo.delete(id);
 
-    if (!deletedUser.affected) {
+    if (!affected) {
       throw new NotFoundException(MESSAGE.NOT_FOUND);
     }
 

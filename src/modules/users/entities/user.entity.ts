@@ -1,3 +1,4 @@
+import { Exclude, Transform } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -6,9 +7,8 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { Exclude, Transform, Type } from 'class-transformer';
 
-@Entity({ name: 'users' })
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -25,15 +25,11 @@ export class User {
   })
   version: number;
 
-  @CreateDateColumn({
-    name: 'created_at',
-  })
+  @CreateDateColumn()
   @Transform(({ value }) => +new Date(value))
   createdAt: number;
 
-  @UpdateDateColumn({
-    name: 'updated_at',
-  })
+  @UpdateDateColumn()
   @Transform(({ value }) => +new Date(value))
   updatedAt: number;
 }

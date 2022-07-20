@@ -1,15 +1,37 @@
-import { IsInt, IsString, ValidateIf } from 'class-validator';
+import { Exclude } from 'class-transformer';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
+import { Artist } from 'src/modules/artists/entities/artist.entity';
+import { Track } from 'src/modules/tracks/entities/track.entity';
+
+@Entity('albums')
 export class Album {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @IsString()
+  @Column()
   name: string;
 
-  @IsInt()
+  @Column('numeric')
   year: number;
 
-  @IsString()
-  @ValidateIf((_, value) => value !== null)
+  @Column({ nullable: true })
   artistId: string | null;
+
+  @ManyToOne(() => Artist, (artist) => artist.albums, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @Exclude()
+  artist: Artist;
+
+  @OneToMany(() => Track, (track) => track.album, { cascade: true })
+  @Exclude()
+  tracks: Track[];
 }

@@ -1,11 +1,7 @@
 export interface IService<Model = unknown> {
-  create: (data: Model) => Model | Promise<Model>;
+  create: (data: any) => Model | Promise<Model>;
   findAll: () => Model[] | Promise<Model[]>;
   findById: (id: string) => Model | Promise<Model>;
-  update: (id: string, data: Partial<Model>) => Model | Promise<Model>;
+  update: (id: string, data: any) => Model | Promise<Model>;
   remove: (id: string) => Model | Promise<Model> | Promise<boolean>;
-  updateWhere?: (
-    filter: Partial<Model>,
-    data: Partial<Model>,
-  ) => Model[] | Promise<Model[]>;
 }

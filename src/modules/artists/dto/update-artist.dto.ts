@@ -1,5 +1,5 @@
-import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/mapped-types';
 
-import { Artist } from '../entities/artist.entity';
+import { CreateArtistDto } from './create-artist.dto';
 
-export class UpdateArtistDto extends OmitType(PartialType(Artist), ['id']) {}
+export class UpdateArtistDto extends PartialType(CreateArtistDto) {}

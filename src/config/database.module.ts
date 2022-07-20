@@ -4,7 +4,6 @@ import { Module } from '@nestjs/common';
 import { join } from 'path';
 
 import { AppConfigModule } from './config.module';
-import { User } from 'src/modules/users/entities/user.entity';
 
 @Module({
   imports: [
@@ -18,7 +17,7 @@ import { User } from 'src/modules/users/entities/user.entity';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
-        entities: [User],
+        entities: [join(__dirname, '../**/*.entity.{ts,js}')],
         synchronize: true,
       }),
     }),
