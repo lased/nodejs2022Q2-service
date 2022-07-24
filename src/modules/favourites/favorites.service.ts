@@ -28,11 +28,13 @@ export class FavoritesService {
     private tracksService: TracksService,
   ) {}
 
-  getFavorites() {
-    return this.favoritesRepo.findOne({
+  async getFavorites() {
+    const favs = await this.favoritesRepo.findOne({
       where: {},
       relations: ['artists', 'albums', 'tracks'],
     });
+
+    return favs || { artists: [], albums: [], tracks: [] };
   }
 
   async add(type: FavoriteType, id: string) {

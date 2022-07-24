@@ -18,7 +18,7 @@ import { AppConfigModule } from './config.module';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
         entities: [join(__dirname, '../**/*.entity.{ts,js}')],
-        synchronize: true,
+        synchronize: process.env.NODE_ENV ? false : true,
       }),
     }),
   ],
