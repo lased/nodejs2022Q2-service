@@ -1,5 +1,5 @@
-import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/mapped-types';
 
-import { Track } from '../entities/track.entity';
+import { CreateTrackDto } from './create-track.dto';
 
-export class UpdateTrackDto extends OmitType(PartialType(Track), ['id']) {}
+export class UpdateTrackDto extends PartialType(CreateTrackDto) {}
