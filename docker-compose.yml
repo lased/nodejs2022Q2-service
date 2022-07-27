@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 
 services:
   postgres:
@@ -8,11 +8,11 @@ services:
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     volumes:
-      - /data/postgres:/data/postgres
+      - ${PGDATA}:/data/postgres
     env_file:
       - .env
     networks:
-      - common_network
+      - app-network
   app:
     container_name: app
     build:
@@ -25,10 +25,11 @@ services:
       - postgres
     ports:
       - ${PORT}:${PORT}
-    network_mode: "host"
     volumes:
       - .:/app
+    networks:
+      - app-network
  
 networks:
-  common_network:
+  app-network:
     driver: bridge
