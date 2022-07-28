@@ -1,31 +1,38 @@
 # Home Library Service
 
-## Prerequisites
+## Installing Docker dependencies
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+Install `docker-scan` scan images for security vulnerabilities.
 
-## Downloading
+> For arch linux: `pacman -S docker-scan`
 
-```
-git clone {repository URL}
-```
-
-## Installing NPM modules
+Run command:
 
 ```
-npm install
+docker-compose up
 ```
 
-## Running application
-
-```
-npm start
-```
-
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
+After starting the app on port (3000 as default) you can open
+in your browser OpenAPI documentation by typing http://localhost:3000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+Run command for scan images for security vulnerabilities:
+
+```
+npm run docker:scan
+```
+
+## Migrations
+
+Migration work only at the first start if the **database** is not initialized.
+
+> For drop database run this command: `npm run typeorm -- query "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT USAGE ON SCHEMA public to PUBLIC; GRANT CREATE ON SCHEMA public to PUBLIC; COMMENT ON SCHEMA public IS 'standard public schema';"`
+
+Run command for start migration:
+
+```
+npm run migration:run
+```
 
 ## Testing
 
@@ -70,3 +77,80 @@ npm run format
 Press <kbd>F5</kbd> to debug.
 
 For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+
+### Available endpoints
+
+#### Users
+
+- `GET /user` - get all users;
+- `GET /user/:id` - get user by id;
+- `POST /user` - create user, body:
+  ```
+  {
+    login: string;
+    password: string
+  }
+  ```
+- `PUT /user/:id` - update user password, body:
+  ```
+  {
+    oldPassword: string;
+    newPassword: string;
+  }
+  ```
+- `DELETE /user/:id` - delete user by id.
+
+#### Tracks
+
+- `GET /track` - get all tracks;
+- `GET /track/:id` - get track by id;
+- `POST /track` - create new track, body:
+  ```
+  {
+    name: string;
+    artistId: string | null;
+    albumId: string | null;
+    duration: number;
+  }
+  ```
+- `PUT /track/:id` - update track info by id;
+- `DELETE /track/:id` - delete track by id.
+
+#### Artists
+
+- `GET /artist` - get all artists;
+- `GET /artist/:id` - get artist by id;
+- `POST /artist` - create new artist, body:
+  ```
+  {
+    name: string;
+    grammy: boolean;
+  }
+  ```
+- `PUT /artist/:id` - update artist info by id;
+- `DELETE /artist/:id` - delete album by id.
+
+#### Albums
+
+- `GET /album` - get all albums
+- `GET /album/:id` - get album by id
+- `POST /album` - create new album, body:
+  ```
+  {
+    name: string;
+    year: number;
+    artistId: string | null;
+  }
+  ```
+- `PUT /album/:id` - update album info by id;
+- `DELETE /album/:id` - delete album by id.
+
+#### Favorites
+
+- `GET /favs` - get all favorites;
+- `POST /favs/track/:id` - add track to the favorites;
+- `DELETE /favs/track/:id` - delete track from favorites;
+- `POST /favs/album/:id` - add album to the favorites;
+- `DELETE /favs/album/:id` - delete album from favorites;
+- `POST /favs/artist/:id` - add artist to the favorites;
+- `DELETE /favs/artist/:id` - delete artist from favorites;
