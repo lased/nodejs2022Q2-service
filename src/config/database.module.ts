@@ -14,9 +14,9 @@ import { AppConfigModule } from './config.module';
         type: 'postgres',
         url: `postgresql://${configService.get(
           'POSTGRES_USER',
-        )}:${configService.get(
-          'POSTGRES_PASSWORD',
-        )}@postgres:${configService.get('POSTGRES_PORT')}/${configService.get(
+        )}:${configService.get('POSTGRES_PASSWORD')}@${configService.get(
+          'POSTGRES_CONTAINER_NAME',
+        )}:${configService.get('POSTGRES_PORT')}/${configService.get(
           'POSTGRES_DB',
         )}?schema=public`,
         entities: [join(__dirname, '../**/*.entity.{ts,js}')],

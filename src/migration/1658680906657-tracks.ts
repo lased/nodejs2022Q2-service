@@ -35,16 +35,24 @@ export class tracks1658680906657 implements MigrationInterface {
             isNullable: true,
           },
         ],
+        foreignKeys: [
+          {
+            columnNames: ['artistId'],
+            referencedTableName: 'artists',
+            referencedColumnNames: ['id'],
+            onDelete: 'SET NULL',
+          },
+          {
+            columnNames: ['albumId'],
+            referencedTableName: 'albums',
+            referencedColumnNames: ['id'],
+            onDelete: 'SET NULL',
+          },
+        ],
       }),
       true,
     );
     await queryRunner.query(`
-      ALTER TABLE ONLY public.tracks
-        ADD CONSTRAINT "FK_5c52e761792791f57de2fec342d" FOREIGN KEY ("albumId") REFERENCES public.albums(id) ON DELETE SET NULL;
-
-      ALTER TABLE ONLY public.tracks
-        ADD CONSTRAINT "FK_62f595181306916265849fced48" FOREIGN KEY ("artistId") REFERENCES public.artists(id) ON DELETE SET NULL;
-
       INSERT INTO public.tracks(id, name, duration, "albumId", "artistId")
         VALUES 
           ('b6563c55-2ea3-4ce1-a8c1-6877e349bcf3', 'track 1', 120, 'b90bbee1-9617-48d9-b5ad-4dbe9c06e53e', '1f817a3d-24d1-4257-9b13-717495c0486d'),

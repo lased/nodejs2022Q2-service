@@ -30,13 +30,18 @@ export class albums1658680901089 implements MigrationInterface {
             isNullable: true,
           },
         ],
+        foreignKeys: [
+          {
+            columnNames: ['artistId'],
+            referencedTableName: 'artists',
+            referencedColumnNames: ['id'],
+            onDelete: 'SET NULL',
+          },
+        ],
       }),
       true,
     );
     await queryRunner.query(`
-      ALTER TABLE ONLY public.albums
-        ADD CONSTRAINT "FK_ed378d7c337efd4d5c8396a77a1" FOREIGN KEY ("artistId") REFERENCES public.artists(id) ON DELETE SET NULL;
-
         INSERT INTO public.albums(id, name, year, "artistId")
             VALUES 
                 ('b90bbee1-9617-48d9-b5ad-4dbe9c06e53e', 'album 1', 2020, '1f817a3d-24d1-4257-9b13-717495c0486d'),
