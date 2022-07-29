@@ -45,6 +45,16 @@ export class UsersService implements IService<User> {
     return user;
   }
 
+  async findByLogin(login: string) {
+    const user = await this.userRepo.findOne({ where: { login } });
+
+    if (!user) {
+      throw new NotFoundException(MESSAGE.NOT_FOUND);
+    }
+
+    return user;
+  }
+
   async update(id: string, { password }: Pick<Required<User>, 'password'>) {
     const newHashedPassword = await this.hashPassword(password);
     const newUserData: Partial<User> = {
