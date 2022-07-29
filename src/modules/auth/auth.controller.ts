@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  HttpCode,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 
 import { RefreshAuthDto } from './dto/refresh-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
@@ -29,7 +22,7 @@ export class AuthController {
 
   @Post('refresh')
   refresh(
-    @Body(new ValidationPipe({ errorHttpStatusCode: 401 }))
+    @Body()
     refreshAuthDto: RefreshAuthDto,
   ) {
     return this.authService.refresh(refreshAuthDto);
