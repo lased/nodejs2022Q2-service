@@ -1,15 +1,22 @@
-import { OmitType } from '@nestjs/mapped-types';
-import { IsNotEmpty } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  IsUUID,
+  ValidateIf,
+} from 'class-validator';
 
-import { Album } from '../entities/album.entity';
-
-export class CreateAlbumDto extends OmitType(Album, ['id']) {
+export class CreateAlbumDto {
   @IsNotEmpty()
+  @IsString()
   name: string;
 
   @IsNotEmpty()
+  @IsInt()
   year: number;
 
   @IsNotEmpty()
+  @IsUUID('4')
+  @ValidateIf((_, value) => value !== null)
   artistId: string | null;
 }

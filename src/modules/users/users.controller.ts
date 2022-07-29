@@ -46,7 +46,7 @@ export class UsersController {
       throw new ForbiddenException(MESSAGE.PASSWORD_MATCH);
     }
 
-    const user = this.usersService.findById(id);
+    const user = await this.usersService.findById(id);
     const isCompare = await compare(oldPassword, user.password);
 
     if (!isCompare) {
@@ -55,7 +55,6 @@ export class UsersController {
 
     return this.usersService.update(id, {
       password: newPassword,
-      version: user.version + 1,
     });
   }
 

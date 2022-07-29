@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:14-alpine
+    restart: unless-stopped
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - ${PGDATA}:/data/postgres
+    env_file:
+      - .env
+    networks:
+      - app-network
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+    env_file: 
+      - .env
+    depends_on:
+      - postgres
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+ 
+networks:
+  app-network:
+    driver: bridge

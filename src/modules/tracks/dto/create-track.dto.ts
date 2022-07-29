@@ -1,18 +1,19 @@
-import { OmitType } from '@nestjs/mapped-types';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString, ValidateIf } from 'class-validator';
 
-import { Track } from '../entities/track.entity';
-
-export class CreateTrackDto extends OmitType(Track, ['id']) {
+export class CreateTrackDto {
   @IsNotEmpty()
   name: string;
 
   @IsNotEmpty()
   duration: number;
 
+  @IsString()
+  @ValidateIf((_, value) => value !== null)
   @IsNotEmpty()
   artistId: string | null;
 
+  @IsString()
+  @ValidateIf((_, value) => value !== null)
   @IsNotEmpty()
   albumId: string | null;
 }
